@@ -158,3 +158,32 @@ p3 <- plot_ly(data, x=~fm, y=~Mileage,
         
 p3
 ```
+
+### Scatter Plot of Month vs Mileage
+
+```{r}
+
+p4 <- plot_ly(data, x=~fm) %>%
+         add_markers(y = ~Mileage,
+                     text = ~paste("Mileage: ", Mileage),
+                     showlegend = F) %>%
+         add_lines(y = ~fitted(loess(Mileage ~ fm)),
+                   name = "Loess Smoother",
+                   color = I("#FFC125"),
+                   showlegend = T,
+                   line = list(width=5)) %>%
+         layout(xaxis = list(title = "Month"),
+                yaxis = list(title = "Mileage"))
+p4
+                
+
+```
+
+### Box Plot of Top State
+
+```{r}
+data %>%
+         group_by(State) %>%
+         ggvis(~State, ~lc, fill = ~State) %>%
+         layer_boxplots()
+```
