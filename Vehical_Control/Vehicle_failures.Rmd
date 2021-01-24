@@ -4,15 +4,18 @@ output:
   flexdashboard::flex_dashboard:
     orientation: rows
     vertical_layout: fill
-    social: ["twitter", "facebook", "menu"]
+    social: ["facebook", "github", "menu"]
     source_Code: embed
 ---
 
 ```{r setup, include=FALSE}
+# Refer documentation of each package for their use (CRAN).
 library(flexdashboard)
 library(knitr)
 library(DT)
-library(rpivoTable)
+library(rpivotTable)
+# devtools::install_github(c("ramnathv/htmlwidgets", "smartinsightsfromdata/rpivotTable"))
+# install.packages("htmltools", dependencies = TRUE, INSTALL_opts = '--no-lock')
 library(ggplot2)
 library(plotly)
 library(dplyr)
@@ -23,11 +26,22 @@ library(ggvis)
 
 ```{r}
 data <- read.csv("VehicleFailure.csv")
+#str(data)
+#fm - failure month
+#lh - labour hours
+#lc - labour costs
+#mc - material costs
 ```
 
 ```{r}
+#A list of colors to use in the dashboard
 mycolors <- c("blue", "#FFC125", "darkgreen", "darkorange")
+
+# In the next whitespace, notice that the Heading: Interactive Data Visualization is what I
+# want as the heading of the first page followed by === to indicate that. Similarly, using --- for
+# rows.
 ```
+
 
 Interactive Data Visualization
 =====================================
@@ -38,6 +52,7 @@ Row
 ### Car Failure Analysis
 
 ```{r}
+# valueBox displays a value in a certain manner. ?valueBox in console. 
 valueBox(paste("Failure"),
          color = "warning")
 ```
@@ -49,7 +64,10 @@ valueBox(length(data$State),
          icon = "fa-user")
 ```
 
+### **Labor Cost**
+
 ```{r}
+#Gauge component for displaying meterised values for labour costs. 
 gauge(round(mean(data$lc),
             digits = 2),
             min = 0,
@@ -86,4 +104,57 @@ valueBox(sum(data$State == "TX"),
 ```{r}
 valueBox(sum(data$State == "FL"),
          icon = 'fa-building')
+```
+
+Row
+-------------------------------
+
+### Failures By State
+
+```{r}
+#Familiarise with Plotly
+p1 <- data %>%
+         group_by(State) %>%
+         summarise(count = n()) %>%
+         plot_ly(x = ~State, y = ~count, color = "blue", type = "bar") %>%
+         layout(xaxis = list(title = "Failures By State"), yaxis = list(title = 'Count'))
+
+p1
+
+
+```
+
+### Top States
+
+```{r}
+p2 <- data %>%
+        group_by(State) %>%
+        summarise(count = n()) %>%
+        filter(count > 50) %>%
+        plot_ly(labels = ~State,
+                 values = ~count,
+                 marker = list(colors = mycolors)) %>%
+        add_pie(hole = 0.4) %>%
+        layout(xaxis = list(zeroline = F,
+                             showline = F,
+                             showticklabels = F,
+                             showgrid = F),
+                yaxis = list(zeroline = F,
+                             showline = F,
+                             showticklabels=F,
+                             showgrid=F))
+p2
+#Understand functions and objects in plotly, add_pie (and similar functions), layout etc.
+```
+
+### FM vs Mileage
+
+```{r}
+# Failure month vs mileage
+
+p3 <- plot_ly(data, x=~fm, y=~Mileage, 
+              text = paste("FM: ", data$fm, "Mileage: ", data$Mileage), type = "bar") %>%
+              layout(xaxis = list(title="FM"), yaxis = list(title = "Failure Mileage"))
+        
+p3
 ```
