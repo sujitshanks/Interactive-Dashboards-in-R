@@ -187,3 +187,90 @@ data %>%
          ggvis(~State, ~lc, fill = ~State) %>%
          layer_boxplots()
 ```
+
+Map
+==============================================
+
+### Map
+
+```{r}
+car <- data %>%
+        group_by(State) %>%
+        summarize(total = n())
+car$State <- abbr2state(car$State) # Function from Package: openintro
+
+highchart() %>%
+          hc_title(text = "Car Failures in US") %>%
+          hc_subtitle(text = "Source: Vehiclefailure.csv") %>%
+          hc_add_series_map(usgeojson, car, name = "State", value = "total", joinBy = c("woename", "State")) %>%
+          hc_mapNavigation(enabled = T)
+
+```
+
+
+Data Table
+============================================
+
+```{r}
+datatable(data, 
+          caption = "Failure Data",
+          rownames = T,
+          filter = "top",
+          options = list(pageLength = 25)
+)
+
+```
+
+Pivot Table
+============================================
+
+```{r}
+rpivotTable(data, 
+            aggregatorName = "Count",
+            cols = "fm",
+            rows = "State",
+            rendererName = "Heatmap")
+
+```
+
+
+Summary {data-orientation=columns} 
+===========================================
+
+Column 
+-----------------------------------
+
+### Max Failure Month
+
+```{r}
+valueBox(max(data$fm),
+         icon = "fa-user" )
+```
+
+### Average Labor cost
+```{r}
+valueBox(round(mean(data$lc),
+               digits = 2),
+         icon = "fa-area-chart")
+```
+
+### Average Mileage at Failure
+
+```{r}
+valueBox(round(mean(data$Mileage), digits = 2),
+         icon = "fa-area-chart")
+```
+
+Column
+---------------------------
+
+Report
+
+* This is a report on `r length(data$fm)` car failures.
+
+* The average labor cost was `r mean(data$lc)`.
+
+* The average material cost was `r mean(data$mc)`.
+
+This report was generated on `r format(Sys.Date(), format = "%B %d, %Y")`.
+
